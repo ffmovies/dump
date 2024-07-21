@@ -46,7 +46,7 @@ export default class WAF {
 			let waf = await axios(`http://${ip}/waf-js-run`, { 
 				headers: { host, 'User-Agent': UA } 
 			}).then(resp => resp.data).catch(console.error)
-			let z = (await Helper.evalDecode(waf)).match(/'(\w{32})'/)[1], o = ''
+			let z = (await this.evalDecode(waf)).match(/'(\w{32})'/)[1], o = ''
 			for (let i = 0; i < z.length; i++) o += z[i] + _a[i] + _b[i];
 			cookie = await axios(`http://${ip}/?__jscheck=${o}`, {
 				headers: { host, 'User-Agent': UA },
@@ -61,5 +61,11 @@ export default class WAF {
 		if (!resp.includes('og:title')) 
 			return { error: 'Waf bypass failed' }
 		return { cookies }
+	}
+
+	static evalDecode(source) {
+		let _eval = globalThis.eval;
+		globalThis.eval = (code) => (globalThis.eval = _eval, code);	  
+		return _eval(source);
 	}
 }
